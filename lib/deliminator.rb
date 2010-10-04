@@ -13,14 +13,13 @@ module Deliminator
       names.each do |name|
         method = self.instance_method(name)
         define_method(name) do |*args|
-          reset
           Vim.let('l:result', method.bind(self).call(*args))
         end
       end
     end
   end
 
-  BRACKETS   = { '(' => ')', '[' => ']', '{' => '}', '<' => '>' }
+  BRACKETS   = { '(' => ')', '[' => ']', '{' => '}' } # , '<' => '>'
   QUOTES     = { '"' => '"', "'" => "'", '`' => '`', '|' => '|' }
   DELIMITERS = BRACKETS.merge(QUOTES)
 
@@ -45,48 +44,31 @@ module Deliminator
   end
 
   def backspace
-    inside_empty_pair? ? '<BS><Del>' : '<BS>'
+    delete_next? ? '<BS><Del>' : '<BS>'
   end
 
   vim_action :delimiter, :space, :backspace
 
   protected
 
-    def opening?(char)
-      DELIMITERS.keys.include?(char)
-    end
-
     def close?(char)
-      close_quote?(char) || close_bracket?(char)
+      quote?(char) && close_quote?(char) || bracket?(char) && close_bracket?(char)
     end
 
     def close_quote?(char)
-      !closing_quote?(char) && !quote?(next_char)
+      !word?(prev_char) && !quote?(next_char)
     end
 
     def close_bracket?(char)
-      bracket?(char) and !followed_by_closing_pair?(char) || inside_empty_pair?
+      true
     end
 
     def step_over?(char)
-      char == next_char
+      char == next_char and closing?(char)
     end
 
-    def closing_quote?(char)
-      # quote?(char) and content_before.count(char) == content_after.count(char) + 1
-      quote?(char) and prev_char =~ /\w/
-    end
-
-    def followed_by_closing_pair?(char)
-      next_char == closing_pair(char)
-    end
-
-    def inside_empty_brackets?
-      bracket?(prev_char) && inside_empty_pair?
-    end
-
-    def inside_empty_pair?
-      prev_char && closing_pair(prev_char) == next_char
+    def delete_next?
+      inside_blank_pair?
     end
 
     def bracket?(char)
@@ -97,52 +79,74 @@ module Deliminator
       QUOTES.keys.include?(char)
     end
 
+    def opening?(char)
+      DELIMITERS.keys.include?(char)
+    end
+
+    def closing?(char)
+      DELIMITERS.values.include?(char)
+    end
+
+    def word?(char)
+      char =~ /\w+/
+    end
+
+    def inside_empty_brackets?
+      bracket?(prev_char) && bracket?(next_char) && inside_empty_pair?
+    end
+
+    def inside_blank_pair?
+      closing_pair(prev_char(:ignore_space => true)) == next_char(:ignore_space => true)
+    end
+
     def closing_pair(char)
       DELIMITERS[char]
     end
 
-    def reset
-      instance_variables.each { |name| instance_variable_set(name, nil) }
+    def prev_char(options = {})
+      ix = column - 1
+      ix = skip_space(ix, :left) if options[:ignore_space]
+      char_at(ix)
     end
 
-    def prev_char
-      @prev_char ||= begin
-        ix = column
-        ix -= 1 until char_at(ix) =~ /\S/ || char_at(ix).nil?
-        char_at(ix)
-      end
+    def next_char(options = {})
+      ix = column
+      ix = skip_space(ix, :right) if options[:ignore_space]
+      char_at(ix)
     end
 
-    def next_char
-      @next_char ||= begin
-        ix = column + 1
-        ix += 1 until char_at(ix) =~ /\S/ || char_at(ix).nil?
-        char_at(ix)
-      end
+    def skip_space(ix, direction)
+      diff = { :left => -1, :right => 1 }[direction]
+      ix += diff until char_at(ix) =~ /[^ \t]/ || char_at(ix).empty?
+      ix
     end
 
     def content_before
-      lines[0..line_number - 2].join + line_before
+      content = lines[0..line_number - 2]
+      content << line_before
+      content.compact.join("\n")
     end
 
     def content_after
-      line_after + lines[line_number..-1].join
+      content = [line_after]
+      content += lines[line_number..-1]
+      content.compact.join("\n")
     end
 
     def line_before
-      line[0..column - 2].to_s
+      line[0..column - 1].to_s
     end
 
     def line_after
-      line[column - 1..-1].to_s
+      line[column..-1].to_s
     end
 
     def char_at(column)
-      line[column - 1, 1]
+      line[column, 1]
     end
 
     def lines
-      (1..buffer.length.to_i).map { |ix| buffer[ix.to_i] }.flatten
+      (1..buffer.length.to_i - 1).map { |ix| buffer[ix.to_i] }.flatten
     end
 
     def line

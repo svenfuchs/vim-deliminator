@@ -1,6 +1,9 @@
 ruby <<
-  path = VIM.evaluate('&runtimepath').split(',').detect { |path| path.include?('vim-deliminator') }
-  $:.unshift("#{path}/lib")
+  def deliminator_path
+    VIM.evaluate('&runtimepath').split(',').detect { |path| path.include?('vim-deliminator') }
+  end
+
+  $:.unshift("#{deliminator_path}/lib")
   require 'deliminator'
 .
 
@@ -24,7 +27,9 @@ function! DeliminatorBackspace()
 endfunction
 
 function! DeliminatorReload()
-  ruby load('delimiter')
+  ruby <<
+    Dir["#{deliminator_path}/**/*.rb"].each { |path| load(path) }
+.
 endfunction
 
 function! SubstituteKeys(string)
