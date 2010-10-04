@@ -25,6 +25,7 @@ module Deliminator
 
   def setup
     DELIMITERS.to_a.flatten.uniq.each { |char| map_delimiter(char) }
+    map_space
     map_backspace
   end
 
@@ -38,10 +39,15 @@ module Deliminator
     end
   end
 
+  def space
+    inside_empty_brackets? ? '  <Left>' : ' '
+  end
+
   def backspace
     inside_empty_pair? ? '<BS><Del>' : '<BS>'
   end
-  vim_result :delimiter, :backspace
+
+  vim_result :delimiter, :space, :backspace
 
   protected
 
@@ -72,6 +78,10 @@ module Deliminator
 
     def followed_by_closing_pair?(char)
       next_char == closing_pair(char)
+    end
+
+    def inside_empty_brackets?
+      bracket?(prev_char) && inside_empty_pair?
     end
 
     def inside_empty_pair?
@@ -141,6 +151,10 @@ module Deliminator
     def map_delimiter(char)
       char = "\\#{char}" if char == '|'
       Vim.command("imap #{char} <C-R>=DeliminatorDelimiter(#{char.inspect})<CR>")
+    end
+
+    def map_space
+      Vim.command('imap <Space> <C-R>=DeliminatorSpace()<CR>')
     end
 
     def map_backspace

@@ -13,6 +13,11 @@ function! DeliminatorDelimiter(char)
   return SubstituteKeys(l:result)
 endfunction
 
+function! DeliminatorSpace()
+  ruby Deliminator.space()
+  return SubstituteKeys(l:result)
+endfunction
+
 function! DeliminatorBackspace()
   ruby Deliminator.backspace()
   return SubstituteKeys(l:result)
@@ -24,7 +29,8 @@ endfunction
 
 function! SubstituteKeys(string)
   let string = a:string
-  for [key, value] in items({ '<Left>': "\<Left>", '<Right>': "\<Right>", '<BS>': "\<BS>", '<Del>': "\<Del>" })
+  let keys = { '<Left>': "\<Left>", '<Right>': "\<Right>", '<BS>': "\<BS>", '<Del>': "\<Del>" }
+  for [key, value] in items(keys)
     echo value
     let string = substitute(string, key, value, '')
   endfor
