@@ -30,17 +30,17 @@ module Deliminator
   end
 
   def delimiter(char)
-    if opening?(char) && close?(char)
-      [char, closing_pair(char), '<Left>'].join
-    elsif step_over?(char)
+    if step_over?(char)
       '<Right>'
+    elsif opening?(char) && close?(char)
+      [char, closing_pair(char), '<Left>'].join
     else
       char
     end
   end
 
   def space
-    inside_empty_brackets? ? '  <Left>' : ' '
+    balance_space? ? '  <Left>' : ' '
   end
 
   def backspace
@@ -51,20 +51,29 @@ module Deliminator
 
   protected
 
+    def step_over?(char)
+      char == next_char and closing?(char)
+    end
+
     def close?(char)
       quote?(char) && close_quote?(char) || bracket?(char) && close_bracket?(char)
     end
 
     def close_quote?(char)
-      !word?(prev_char) && !quote?(next_char)
+      # !word?(prev_char) && !quote?(next_char)
+      balanced?(content_before, char) && balanced?(content_after, char)
+    end
+
+    def balanced?(content, char)
+      content.count(char) % 2 == 0
     end
 
     def close_bracket?(char)
       true
     end
 
-    def step_over?(char)
-      char == next_char and closing?(char)
+    def balance_space?
+      inside_empty_brackets?
     end
 
     def delete_next?
@@ -72,7 +81,7 @@ module Deliminator
     end
 
     def bracket?(char)
-      BRACKETS.keys.include?(char)
+      BRACKETS.keys.include?(char) || BRACKETS.values.include?(char)
     end
 
     def quote?(char)
@@ -92,7 +101,7 @@ module Deliminator
     end
 
     def inside_empty_brackets?
-      bracket?(prev_char) && bracket?(next_char) && inside_empty_pair?
+      bracket?(prev_char) && bracket?(next_char) && inside_blank_pair?
     end
 
     def inside_blank_pair?
@@ -122,14 +131,14 @@ module Deliminator
     end
 
     def content_before
-      content = lines[0..line_number - 2]
+      content = lines[0..line_number - 2] || []
       content << line_before
       content.compact.join("\n")
     end
 
     def content_after
       content = [line_after]
-      content += lines[line_number..-1]
+      content += lines[line_number..-1] || []
       content.compact.join("\n")
     end
 

@@ -48,21 +48,37 @@ class DeliminatorTest < Test::Unit::TestCase
     assert close?('(')
   end
 
-  test "does not close an opening quote: preceded by word-char" do
-    # supposed to help with typing " at: "abc resulting in: "abc" (maybe this should count quotes instead?)
-    buffer << '"abc'
-    move_to 1, 4
-    assert_equal '', next_char
+  # test "does not close a quote preceded by word-char" do
+  #   # supposed to help with typing " at: "abc resulting in: "abc" (maybe this should count quotes instead?)
+  #   buffer << '"abc'
+  #   move_to 1, 4
+  #   assert_equal '', next_char
+  #   assert !close?('"')
+  # end
+
+  test "closes an opening quote" do
+    # typing a " at: foo("bar", |, "baz") results in: foo("bar", "|", "baz")
+    buffer << 'foo("bar", , "baz")'
+    move_to 1, 11
+    assert_equal ',', next_char
     assert !close?('"')
   end
 
-  test "does not close a quote: followed by a quote" do
-    # when typing " at: abc|" results in: abc"|
-    buffer << 'abc"'
-    move_to 1, 3
-    assert_equal '"', next_char
+  test "does not close a closing quote" do
+    # typing a " at: foo("bar|, "baz") results in: foo("bar"|, "baz")
+    buffer << 'foo("bar, "baz")'
+    move_to 1, 8
+    assert_equal ',', next_char
     assert !close?('"')
   end
+
+  # test "does not close a quote followed by a quote" do
+  #   # when typing " at: abc|" results in: abc"|
+  #   buffer << 'abc"'
+  #   move_to 1, 3
+  #   assert_equal '"', next_char
+  #   assert !close?('"')
+  # end
 
   test "typing ( steps over a succeeding (" do
     # not sure where this is useful
@@ -119,6 +135,14 @@ class DeliminatorTest < Test::Unit::TestCase
     assert_equal ' ', prev_char
     assert_equal ' ', next_char
     assert delete_next?
+  end
+
+  test 'typing a space inside an empty pair of brackets inserts another space after the cursor' do
+    # typing <space> at: abc(|) results in: abc( | )
+    buffer << 'abc()'
+    move_to 1, 4
+    assert_equal '(', prev_char
+    assert balance_space?
   end
 
   test 'prev_char' do
