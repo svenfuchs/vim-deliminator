@@ -41,7 +41,7 @@ module Deliminator
   end
 
   def space
-    inside_empty_bracket? ? '  <Left>' : ' '
+    inside_empty_brackets? ? '  <Left>' : ' '
   end
 
   def backspace
@@ -107,13 +107,17 @@ module Deliminator
 
     def prev_char
       @prev_char ||= begin
-        char_at(column)
+        ix = column
+        ix -= 1 until char_at(ix) =~ /\S/ || char_at(ix).nil?
+        char_at(ix)
       end
     end
 
     def next_char
       @next_char ||= begin
-        char_at(column + 1)
+        ix = column + 1
+        ix += 1 until char_at(ix) =~ /\S/ || char_at(ix).nil?
+        char_at(ix)
       end
     end
 
