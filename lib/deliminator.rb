@@ -9,10 +9,11 @@ end
 
 module Deliminator
   class << self
-    def vim_result(*names)
+    def vim_action(*names)
       names.each do |name|
         method = self.instance_method(name)
         define_method(name) do |*args|
+          reset
           Vim.let('l:result', method.bind(self).call(*args))
         end
       end
@@ -40,14 +41,14 @@ module Deliminator
   end
 
   def space
-    inside_empty_brackets? ? '  <Left>' : ' '
+    inside_empty_bracket? ? '  <Left>' : ' '
   end
 
   def backspace
     inside_empty_pair? ? '<BS><Del>' : '<BS>'
   end
 
-  vim_result :delimiter, :space, :backspace
+  vim_action :delimiter, :space, :backspace
 
   protected
 
@@ -100,12 +101,20 @@ module Deliminator
       DELIMITERS[char]
     end
 
+    def reset
+      instance_variables.each { |name| instance_variable_set(name, nil) }
+    end
+
     def prev_char
-      char_at(column)
+      @prev_char ||= begin
+        char_at(column)
+      end
     end
 
     def next_char
-      char_at(column + 1)
+      @next_char ||= begin
+        char_at(column + 1)
+      end
     end
 
     def content_before
