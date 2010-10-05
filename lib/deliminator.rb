@@ -19,8 +19,8 @@ module Deliminator
     end
   end
 
-  BRACKETS   = { '(' => ')', '[' => ']', '{' => '}' } # , '<' => '>'
-  QUOTES     = { '"' => '"', "'" => "'", '`' => '`', '|' => '|' }
+  BRACKETS   = { '(' => ')', '[' => ']', '{' => '}' } # , '<' => '>', '|' => '|'
+  QUOTES     = { '"' => '"', "'" => "'", '`' => '`' }
   DELIMITERS = BRACKETS.merge(QUOTES)
 
   def setup
@@ -126,12 +126,12 @@ module Deliminator
 
     def skip_space(ix, direction)
       diff = { :left => -1, :right => 1 }[direction]
-      ix += diff until char_at(ix) =~ /[^ \t]/ || char_at(ix).empty?
+      ix += diff until char_at(ix) =~ /[^ \t]/ || char_at(ix).blank?
       ix
     end
 
     def content_before
-      content = lines[0..line_number - 2] || []
+      content = lines[0, line_number - 1] || []
       content << line_before
       content.compact.join("\n")
     end

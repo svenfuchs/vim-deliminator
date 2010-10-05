@@ -1,9 +1,9 @@
 ruby <<
-  def deliminator_path
+  def deliminator_dir
     VIM.evaluate('&runtimepath').split(',').detect { |path| path.include?('vim-deliminator') }
   end
 
-  $:.unshift("#{deliminator_path}/lib")
+  $:.unshift("#{deliminator_dir}/lib")
   require 'deliminator'
 .
 
@@ -28,7 +28,9 @@ endfunction
 
 function! DeliminatorReload()
   ruby <<
-    Dir["#{deliminator_path}/**/*.rb"].each { |path| load(path) }
+    dir = deliminator_dir
+    Dir["#{dir}/lib/**/*.rb"].each { |path| load(path) }
+    Vim.cmd("silent! so #{dir}/plugin/deliminator.vim")
 .
 endfunction
 
