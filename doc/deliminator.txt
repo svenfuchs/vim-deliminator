@@ -1,0 +1,30 @@
+*deliminator.txt* Plugin for balancing delimiters (parentheses, quotes etc.)
+
+Author: Sven Fuchs <svenfuchs@artweb-design.de> *deliminator-author*
+
+INTRODUCTION                                    *deliminator*
+
+Balancing of delimiters in Vim, targetted at writing Ruby.
+
+* Autocloses parenthesis, brackets, braces, quotes and backticks,
+* balances whitespace within parenthesis and
+* makes backspacing a delimiter delete its pair as well.
+
+
+BRACKETS                                        *deliminator-brackets*
+
+Having:     Typing:    Result:      Comment
+
+foo|        (          foo(|)       The parenthesis was balanced.
+foo(|)      )          foo()|       You type over the closing parenthesis.
+foo(|)      <Space>    foo( | )     The space was expanded.
+foo(|)      <BS>       foo          The closing parenthesis was deleted.
+foo( | )    <BS>       foo(|)       The expanded space was deleted.
+(|)         (          ((|))        Nested parenthesis are balanced, too.
+
+
+QUOTES                                          *deliminator-quotes*
+
+...
+
+

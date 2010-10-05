@@ -1,0 +1,9 @@
+h1. Vim Deliminator
+
+Balancing of delimiters in Vim, targetted at writing Ruby.
+
+* Autocloses parenthesis, brackets, braces, quotes and backticks,
+* balances whitespace within parenthesis and
+* makes backspacing a delimiter delete its pair as well.
+
+See the Vim doc for details.
