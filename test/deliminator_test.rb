@@ -156,7 +156,19 @@ class DeliminatorTest < Test::Unit::TestCase
   test 'prev_char skipping whitespace' do
     buffer << '(  )'
     move_to 1, 3
-    assert_equal '(', prev_char(:ignore_space =>true)
+    assert_equal '(', prev_char(:skip_space =>true)
+  end
+
+  test 'prev_char skipping whitespace does not run into infinite loop in an empty buffer' do
+    buffer << ''
+    move_to 1, 0
+    assert_equal '', prev_char(:skip_space =>true)
+  end
+
+  test 'prev_char skipping whitespace does not run into infinite loop in a line that only contains whitespace' do
+    buffer << '   '
+    move_to 1, 3
+    assert_equal ' ', prev_char(:skip_space =>true)
   end
 
   test 'next_char' do
@@ -168,7 +180,19 @@ class DeliminatorTest < Test::Unit::TestCase
   test 'next_char skipping whitespace' do
     buffer << '(  )'
     move_to 1, 1
-    assert_equal ')', next_char(:ignore_space =>true)
+    assert_equal ')', next_char(:skip_space =>true)
+  end
+
+  test 'next_char skipping whitespace does not run into infinite loop in an empty buffer' do
+    buffer << ''
+    move_to 1, 0
+    assert_equal '', next_char(:skip_space =>true)
+  end
+
+  test 'next_char skipping whitespace does not run into infinite loop in a line that only contains whitespace' do
+    buffer << '   '
+    move_to 1, 0
+    assert_equal ' ', next_char(:skip_space =>true)
   end
 
   test 'content_before' do

@@ -105,7 +105,7 @@ module Deliminator
     end
 
     def inside_blank_pair?
-      closing_pair(prev_char(:ignore_space => true)) == next_char(:ignore_space => true)
+      closing_pair(prev_char(:skip_space => true)) == next_char(:skip_space => true)
     end
 
     def closing_pair(char)
@@ -114,19 +114,19 @@ module Deliminator
 
     def prev_char(options = {})
       ix = column - 1
-      ix = skip_space(ix, :left) if options[:ignore_space]
-      char_at(ix)
+      ix = skip_space(ix, :left) if options[:skip_space]
+      char_at(ix) || ''
     end
 
     def next_char(options = {})
       ix = column
-      ix = skip_space(ix, :right) if options[:ignore_space]
-      char_at(ix)
+      ix = skip_space(ix, :right) if options[:skip_space]
+      char_at(ix) || ''
     end
 
     def skip_space(ix, direction)
       diff = { :left => -1, :right => 1 }[direction]
-      ix += diff until char_at(ix) =~ /[^ \t]/ || char_at(ix).blank?
+      ix += diff until ix < 1 || char_at(ix) =~ /[^ \t]/ || char_at(ix).blank?
       ix
     end
 
