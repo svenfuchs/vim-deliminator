@@ -15,14 +15,14 @@ class DeliminatorTest < Test::Unit::TestCase
     $curwin.cursor = cursor
   end
 
-  # CLOSE?
+  # AUTO_CLOSE?
 
   test "closes an opening parenthesis: preceded by word-char, followed by nothing" do
     # happens all the time when typing at the end of the line
     buffer << 'abc'
     move_to 1, 3
     assert_equal '', next_char
-    assert close?('(')
+    assert auto_close?('(')
   end
 
   test "closes an opening parenthesis: preceded by word-char, followed by word-char" do
@@ -30,7 +30,7 @@ class DeliminatorTest < Test::Unit::TestCase
     buffer << 'abcdef'
     move_to 1, 3
     assert_equal 'd', next_char
-    assert close?('(')
+    assert auto_close?('(')
   end
 
   test "closes an opening parenthesis: preceded by word-char, followed by closing parenthesis" do
@@ -38,7 +38,7 @@ class DeliminatorTest < Test::Unit::TestCase
     buffer << 'abc)'
     move_to 1, 3
     assert_equal ')', next_char
-    assert close?('(')
+    assert auto_close?('(')
   end
 
   test "closes an opening parenthesis: preceded by opening parenthesis, followed by closing parenthesis" do
@@ -46,7 +46,7 @@ class DeliminatorTest < Test::Unit::TestCase
     buffer << 'ab()'
     move_to 1, 3
     assert_equal ')', next_char
-    assert close?('(')
+    assert auto_close?('(')
   end
 
   test "closes an opening quote" do
@@ -54,7 +54,7 @@ class DeliminatorTest < Test::Unit::TestCase
     buffer << 'foo("bar", , "baz")'
     move_to 1, 11
     assert_equal ',', next_char
-    assert close?('"')
+    assert auto_close?('"')
   end
 
   test "does not close a closing quote" do
@@ -62,7 +62,7 @@ class DeliminatorTest < Test::Unit::TestCase
     buffer << 'foo("bar, "baz")'
     move_to 1, 8
     assert_equal ',', next_char
-    assert !close?('"')
+    assert !auto_close?('"')
   end
 
   # STEP_OVER?

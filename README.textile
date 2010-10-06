@@ -6,4 +6,4 @@ Balancing of delimiters in Vim, targetted at writing Ruby.
 * balances whitespace within parenthesis and
 * makes backspacing a delimiter delete its pair as well.
 
-See the Vim doc for details.
+See the "Vim doc":http://github.com/svenfuchs/vim-deliminator/blob/master/doc/deliminator.txt for details.

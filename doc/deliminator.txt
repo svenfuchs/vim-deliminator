@@ -1,30 +1,67 @@
 *deliminator.txt* Plugin for balancing delimiters (parentheses, quotes etc.)
 
-Author: Sven Fuchs <svenfuchs@artweb-design.de> *deliminator-author*
+Author: Sven Fuchs <svenfuchs@artweb-design.de>       *deliminator-about*
+Source: http://github.com/svenfuchs/vim-deliminator
+License: MIT http://github.com/svenfuchs/vim-deliminator/LICENCSE
 
-INTRODUCTION                                    *deliminator*
+
+INTRODUCTION                                          *deliminator*
 
 Balancing of delimiters in Vim, targetted at writing Ruby.
 
-* Autocloses parenthesis, brackets, braces, quotes and backticks,
-* balances whitespace within parenthesis and
-* makes backspacing a delimiter delete its pair as well.
+  * Autocloses parenthesis, brackets, braces, quotes and backticks,
+  * balances whitespace within parenthesis and
+  * makes backspacing a delimiter delete its pair as well.
 
 
-BRACKETS                                        *deliminator-brackets*
+BRACKETS                                              *deliminator-brackets*
+
+When you type an opening bracket (parenthesis, square bracket, curly brace)
+it is auto-completed by its closing equivalent and the cursor will be placed
+inside of the resulting, empty pair of brackets.
 
 Having:     Typing:    Result:      Comment
 
-foo|        (          foo(|)       The parenthesis was balanced.
+foo|        (          foo(|)       The parenthesis was auto-completed.
 foo(|)      )          foo()|       You type over the closing parenthesis.
 foo(|)      <Space>    foo( | )     The space was expanded.
 foo(|)      <BS>       foo          The closing parenthesis was deleted.
 foo( | )    <BS>       foo(|)       The expanded space was deleted.
 (|)         (          ((|))        Nested parenthesis are balanced, too.
 
+When you type a closing bracket immediately before an existing, closing
+bracket of the same type then it will step over it except when the previsous
+character is a backslash:
 
-QUOTES                                          *deliminator-quotes*
+Having:     Typing:    Result:      Steps over the closing bracket?
 
-...
+(|)         )          ()|          yes
+\|)         )          \)|)         no
 
 
+QUOTES                                                *deliminator-quotes*
+
+When you type a double or single quote it will be autoclosed and the cursor
+will be placed inside of the resulting, empty pair of quotes, except when the
+the cursor currently is placed after a word character, a quote or a backslash.
+
+Having:     Typing:    Result:      Auto-completes the quote?
+
+foo(|)      "          foo("|")     yes
+foo = |     "          foo = ""     yes
+"foo|       "          "foo"        no
+I|          'm         I'm          no
+"\|"        "          "\""         no
+
+When you type a quote immediately before an existing quote of the same type
+then it will step over it except when the previsous character is a backslash:
+
+Having:     Typing:    Result:      Steps over the quote?
+
+"|"         "          ""|          yes
+"\|"        "          "\"|"        no
+
+
+
+
+vim:tw=78:ts=8:ft=help:norl:
